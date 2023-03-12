@@ -4,19 +4,14 @@ import './stylesheets/styles.scss';
 function App() {
   const app = document.createElement('div');
 
-  let locationFromUser = 'sacramento';
-
-  async function getGeoLocationData() {
+  async function getLocationData(value) {
     try {
       const response = await fetch(
-        `https://api.openweathermap.org/geo/1.0/direct?q=${locationFromUser}&limit=1&appid=de594cdf8e316a5e01f9bfc405afc36f`
+        `https://api.openweathermap.org/geo/1.0/direct?q=${value}&limit=1&appid=de594cdf8e316a5e01f9bfc405afc36f`
       );
 
       let geoLocationData = await response.json();
-
-      let lat = geoLocationData[0].lat;
-
-      let lon = geoLocationData[0].lon;
+      let { lat, lon } = geoLocationData[0];
 
       return { lat, lon };
     } catch (error) {
@@ -24,32 +19,39 @@ function App() {
     }
   }
 
-  async function getWeatherData() {
+  async function getWeatherData(value) {
     try {
-      let { lat, lon } = await getGeoLocationData();
+      let { lat, lon } = await getLocationData(value);
 
       const response = await fetch(
         `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=de594cdf8e316a5e01f9bfc405afc36f`
       );
       const weatherData = await response.json();
-      console.log(weatherData);
+      // console.log(weatherData);
     } catch (error) {
       console.log(error);
     }
   }
 
-  getWeatherData();
+  // DOM STUFF
 
-  app.innerHTML = `
-    <h1>Welcome to the Weather App!</h1>
+  const form = document.createElement('form');
+  const input = document.createElement('input');
+  const button = document.createElement('input');
 
-    <form class="form">
-      <input class="input" type="text" placeholder="Enter City or Zip" />
-    </form>
+  button.setAttribute('type', 'submit');
+  button.textContent = 'Submit';
 
-    <div class="weather-data">
-    </div>
-  `;
+  input.setAttribute('type', 'text');
+
+  form.addEventListener('submit', (e) => {
+    e.preventDefault();
+    // console.log(input.value);
+    getWeatherData(input.value);
+  });
+
+  form.append(input, button);
+  app.append(form);
 
   return app;
 }
